@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{.title}} — Satbaria College Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: { 50:'#f0f9ff',100:'#e0f2fe',500:'#0ea5e9',600:'#0284c7',700:'#0369a1',800:'#075985',900:'#0c4a6e' },
+                        accent:  { 400:'#fb923c',500:'#f97316',600:'#ea580c' }
+                    }
+                }
+            }
+        }
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"/>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; }
+        .sidebar-link { @apply flex items-center gap-3 px-4 py-2.5 rounded-lg text-sm font-medium transition-all duration-150; }
+        .sidebar-link:hover { @apply bg-white/10 text-white; }
+        .sidebar-link.active { @apply bg-white/20 text-white font-semibold; }
+        .sidebar-link:not(.active) { @apply text-blue-100; }
+    </style>
+</head>
+<body class="bg-gray-100 min-h-screen flex">
+
+<!-- Sidebar -->
+<aside class="w-64 bg-gradient-to-b from-primary-800 to-primary-900 min-h-screen flex flex-col shadow-xl fixed left-0 top-0 z-40">
+    <!-- Logo -->
+    <div class="px-6 py-5 border-b border-white/10">
+        <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-accent-500 rounded-full flex items-center justify-center shadow">
+                <i class="fas fa-graduation-cap text-white text-lg"></i>
+            </div>
+            <div>
+                <p class="text-white font-bold text-sm leading-tight">Satbaria</p>
+                <p class="text-blue-200 text-xs">Degree College</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Nav -->
+    <nav class="flex-1 px-3 py-4 space-y-1 overflow-y-auto">
+        <p class="text-blue-300 text-xs font-semibold uppercase tracking-wider px-3 mb-2">Main</p>
+        <a href="/admin/dashboard" class="sidebar-link {{if eq .title "Dashboard"}}active{{end}}">
+            <i class="fas fa-tachometer-alt w-4"></i> Dashboard
+        </a>
+
+        <p class="text-blue-300 text-xs font-semibold uppercase tracking-wider px-3 mt-4 mb-2">Academics</p>
+        <a href="/admin/teachers" class="sidebar-link {{if eq .title "Teachers"}}active{{end}}">
+            <i class="fas fa-chalkboard-teacher w-4"></i> Teachers
+        </a>
+        <a href="/admin/staff" class="sidebar-link {{if eq .title "Staff"}}active{{end}}">
+            <i class="fas fa-users w-4"></i> Staff
+        </a>
+        <a href="/admin/student-summary" class="sidebar-link {{if eq .title "Student Summary"}}active{{end}}">
+            <i class="fas fa-user-graduate w-4"></i> Student Summary
+        </a>
+        <a href="/admin/results" class="sidebar-link {{if eq .title "Results"}}active{{end}}">
+            <i class="fas fa-file-alt w-4"></i> Results
+        </a>
+
+        <p class="text-blue-300 text-xs font-semibold uppercase tracking-wider px-3 mt-4 mb-2">Content</p>
+        <a href="/admin/notices" class="sidebar-link {{if eq .title "Notices"}}active{{end}}">
+            <i class="fas fa-bell w-4"></i> Notices
+        </a>
+        <a href="/admin/gallery" class="sidebar-link {{if eq .title "Gallery"}}active{{end}}">
+            <i class="fas fa-images w-4"></i> Gallery
+        </a>
+        <a href="/admin/feedback" class="sidebar-link {{if eq .title "Feedback & Messages"}}active{{end}}">
+            <i class="fas fa-envelope w-4"></i> Feedback
+        </a>
+
+        <p class="text-blue-300 text-xs font-semibold uppercase tracking-wider px-3 mt-4 mb-2">System</p>
+        <a href="/admin/settings" class="sidebar-link {{if eq .title "Settings"}}active{{end}}">
+            <i class="fas fa-cog w-4"></i> Settings
+        </a>
+        <a href="/admin/logout" class="sidebar-link text-red-300 hover:text-red-100 hover:bg-red-500/20">
+            <i class="fas fa-sign-out-alt w-4"></i> Logout
+        </a>
+    </nav>
+
+    <!-- User info -->
+    <div class="px-4 py-3 border-t border-white/10">
+        <div class="flex items-center gap-2">
+            <div class="w-8 h-8 bg-accent-500 rounded-full flex items-center justify-center">
+                <i class="fas fa-user text-white text-xs"></i>
+            </div>
+            <div>
+                <p class="text-white text-xs font-medium">{{.username}}</p>
+                <p class="text-blue-300 text-xs">Administrator</p>
+            </div>
+        </div>
+    </div>
+</aside>
+
+<!-- Main Content -->
+<main class="ml-64 flex-1 min-h-screen flex flex-col">
+    <!-- Top Bar -->
+    <header class="bg-white shadow-sm px-6 py-4 flex items-center justify-between sticky top-0 z-30">
+        <h1 class="text-xl font-bold text-gray-800">{{.title}}</h1>
+        <div class="flex items-center gap-4">
+            <span class="text-sm text-gray-500"><i class="fas fa-clock mr-1"></i><span id="clock"></span></span>
+            <a href="/" target="_blank" class="text-sm text-primary-600 hover:text-primary-700 font-medium">
+                <i class="fas fa-external-link-alt mr-1"></i>View Site
+            </a>
+        </div>
+    </header>
+
+    <!-- Page Content -->
+    <div class="flex-1 p-6">

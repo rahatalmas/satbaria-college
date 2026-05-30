@@ -1,0 +1,40 @@
+import axios from 'axios'
+
+const api = axios.create({
+  baseURL: '/api/v1',
+  timeout: 10000,
+})
+
+// College Info
+export const getCollegeInfo = () => api.get('/college-info').then(r => r.data.data)
+
+// Teachers
+export const getTeachers = () => api.get('/teachers').then(r => r.data.data)
+
+// Staff
+export const getStaff = () => api.get('/staff').then(r => r.data.data)
+
+// Notices
+export const getNotices = () => api.get('/notices').then(r => r.data.data)
+export const getNotice = (id) => api.get(`/notices/${id}`).then(r => r.data.data)
+
+// Gallery
+export const getGallery = (category = '') =>
+  api.get('/gallery', { params: category ? { category } : {} }).then(r => r.data.data)
+
+// Results
+export const getResults = (params = {}) =>
+  api.get('/results', { params }).then(r => r.data.data)
+
+// Student Summary
+export const getStudentSummary = (params = {}) =>
+  api.get('/student-summary', { params }).then(r => r.data.data)
+
+// Classes & Groups
+export const getClasses = () => api.get('/classes').then(r => r.data.data)
+export const getGroups = () => api.get('/groups').then(r => r.data.data)
+
+// Feedback
+export const submitFeedback = (data) => api.post('/feedback', data).then(r => r.data)
+
+export default api
