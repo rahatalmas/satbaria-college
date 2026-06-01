@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { useParams, Link } from 'react-router-dom'
-import { getNotice } from '../hooks/useApi'
+import { getNotice, assetUrl } from '../hooks/useApi'
 
 export default function NoticeDetail() {
   const { id } = useParams()
@@ -52,7 +52,7 @@ export default function NoticeDetail() {
 
         <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
           {notice.image && (
-            <img src={notice.image} alt={notice.title} className="w-full h-64 object-cover" />
+            <img src={assetUrl(notice.image)} alt={notice.title} className="w-full h-64 object-cover" />
           )}
           <div className="p-8">
             {notice.is_pinned && (

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getGallery } from '../hooks/useApi'
+import { getGallery, assetUrl } from '../hooks/useApi'
 
 export default function Gallery() {
   const [images, setImages] = useState([])
@@ -61,7 +61,7 @@ export default function Gallery() {
                 className="aspect-square rounded-2xl overflow-hidden cursor-pointer group relative bg-gray-100 border border-gray-100 hover:shadow-lg transition-shadow"
               >
                 <img
-                  src={img.image_path}
+                  src={assetUrl(img.image_path)}
                   alt={img.title || 'Gallery'}
                   className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                   onError={e => { e.target.src = 'https://via.placeholder.com/400x400?text=Image' }}
@@ -92,7 +92,7 @@ export default function Gallery() {
           <button className="absolute top-4 right-4 text-white/70 hover:text-white text-3xl font-light">×</button>
           <div onClick={e => e.stopPropagation()} className="max-w-4xl max-h-screen">
             <img
-              src={lightbox.image_path}
+              src={assetUrl(lightbox.image_path)}
               alt={lightbox.title}
               className="max-w-full max-h-[85vh] object-contain rounded-xl"
             />

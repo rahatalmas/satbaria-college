@@ -1,12 +1,12 @@
 import { useState, useEffect } from 'react'
-import { getTeachers } from '../hooks/useApi'
+import { getTeachers, assetUrl } from '../hooks/useApi'
 
 function TeacherCard({ teacher }) {
   return (
     <div className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-all duration-300 overflow-hidden border border-gray-100 group">
       <div className="bg-gradient-to-br from-college-800 to-college-900 h-32 flex items-center justify-center relative">
         {teacher.picture ? (
-          <img src={teacher.picture} alt={teacher.name}
+          <img src={assetUrl(teacher.picture)} alt={teacher.name}
             className="w-24 h-24 rounded-full object-cover border-4 border-white shadow-lg absolute -bottom-10" />
         ) : (
           <div className="w-24 h-24 rounded-full bg-college-700 border-4 border-white shadow-lg absolute -bottom-10 flex items-center justify-center">

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { getStaff } from '../hooks/useApi'
+import { getStaff, assetUrl } from '../hooks/useApi'
 
 export default function Staff() {
   const [staff, setStaff] = useState([])
@@ -37,7 +37,7 @@ export default function Staff() {
               <div key={s.ID} className="bg-white rounded-2xl shadow-sm hover:shadow-md transition-shadow border border-gray-100 p-5 text-center">
                 <div className="w-16 h-16 rounded-full bg-college-100 flex items-center justify-center mx-auto mb-3">
                   {s.picture ? (
-                    <img src={s.picture} alt={s.name} className="w-16 h-16 rounded-full object-cover" />
+                    <img src={assetUrl(s.picture)} alt={s.name} className="w-16 h-16 rounded-full object-cover" />
                   ) : (
                     <svg className="w-7 h-7 text-college-400" fill="currentColor" viewBox="0 0 24 24">
                       <path d="M12 12c2.7 0 4.8-2.1 4.8-4.8S14.7 2.4 12 2.4 7.2 4.5 7.2 7.2 9.3 12 12 12zm0 2.4c-3.2 0-9.6 1.6-9.6 4.8v2.4h19.2v-2.4c0-3.2-6.4-4.8-9.6-4.8z"/>

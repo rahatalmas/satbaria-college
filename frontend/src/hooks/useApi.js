@@ -1,9 +1,19 @@
 import axios from 'axios'
 
+export const API_DOMAIN = 'http://localhost:5599'
+
 const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: `${API_DOMAIN}/api/v1`,
   timeout: 10000,
 })
+
+// Resolve a (possibly relative) asset path against the API domain so that
+// uploaded images load correctly both in dev and after build.
+export const assetUrl = (path) => {
+  if (!path) return path
+  if (/^https?:\/\//i.test(path)) return path
+  return `${API_DOMAIN}${path.startsWith('/') ? '' : '/'}${path}`
+}
 
 // College Info
 export const getCollegeInfo = () => api.get('/college-info').then(r => r.data.data)
