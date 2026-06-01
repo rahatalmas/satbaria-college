@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const API_DOMAIN = 'http://localhost:5599'
+export const API_DOMAIN = 'http://104.223.22.230:5599'
 
 const api = axios.create({
   baseURL: `${API_DOMAIN}/api/v1`,
