@@ -1,6 +1,6 @@
 import axios from 'axios'
 
-export const API_DOMAIN = 'http://104.223.22.230:5599'
+export const API_DOMAIN = 'https://api.satbariadegreecollege.edu.bd'
 
 const api = axios.create({
   baseURL: `${API_DOMAIN}/api/v1`,
