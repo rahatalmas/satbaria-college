@@ -48,10 +48,10 @@ export default function Home() {
   useEffect(() => {
     getCollegeInfo().then(setInfo).catch(() => {})
     getNotices().then(n => setNotices(n?.slice(0, 6) || [])).catch(() => {})
-    getStudentSummary().then(setSummary).catch(() => {})
+    getStudentSummary().then(s => setSummary(s || [])).catch(() => {})
   }, [])
 
-  const totalStudents = summary.reduce((acc, s) => acc + (s.total || 0), 0)
+  const totalStudents = (summary || []).reduce((acc, s) => acc + (s.total || 0), 0)
 
   return (
     <div>

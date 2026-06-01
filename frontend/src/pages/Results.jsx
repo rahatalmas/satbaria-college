@@ -9,8 +9,8 @@ export default function Results() {
   const [filters, setFilters] = useState({ class: '', group: '' })
 
   useEffect(() => {
-    getClasses().then(setClasses)
-    getGroups().then(setGroups)
+    getClasses().then(c => setClasses(c || [])).catch(() => {})
+    getGroups().then(g => setGroups(g || [])).catch(() => {})
   }, [])
 
   useEffect(() => {
