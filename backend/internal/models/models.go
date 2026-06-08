@@ -34,12 +34,28 @@ type Staff struct {
 // Notice model
 type Notice struct {
 	gorm.Model
-	Title       string    `gorm:"not null" json:"title"`
-	Content     string    `gorm:"type:text" json:"content"`
-	Image       string    `json:"image"`
-	PublishDate time.Time `json:"publish_date"`
-	IsActive    bool      `gorm:"default:true" json:"is_active"`
-	IsPinned    bool      `gorm:"default:false" json:"is_pinned"`
+	Title          string    `gorm:"not null" json:"title"`
+	Content        string    `gorm:"type:text" json:"content"`
+	Image          string    `json:"image"`
+	Attachment     string    `json:"attachment"`      // path to uploaded file (pdf/doc/any)
+	AttachmentName string    `json:"attachment_name"` // original file name
+	PublishDate    time.Time `json:"publish_date"`
+	IsActive       bool      `gorm:"default:true" json:"is_active"`
+	IsPinned       bool      `gorm:"default:false" json:"is_pinned"`
+}
+
+// GovOrder model - government orders/circulars with attachment
+type GovOrder struct {
+	gorm.Model
+	Title          string    `gorm:"not null" json:"title"`
+	Content        string    `gorm:"type:text" json:"content"`
+	OrderNumber    string    `json:"order_number"`
+	Attachment     string    `json:"attachment"`      // path to uploaded file (pdf/doc/any)
+	AttachmentName string    `json:"attachment_name"` // original file name
+	OrderDate      time.Time `json:"order_date"`      // date printed on the order
+	PublishDate    time.Time `json:"publish_date"`    // date published on the site
+	IsActive       bool      `gorm:"default:true" json:"is_active"`
+	IsPinned       bool      `gorm:"default:false" json:"is_pinned"`
 }
 
 // GalleryImage model

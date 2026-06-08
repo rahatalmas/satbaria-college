@@ -39,6 +39,7 @@ func Migrate() {
 		&models.Teacher{},
 		&models.Staff{},
 		&models.Notice{},
+		&models.GovOrder{},
 		&models.GalleryImage{},
 		&models.Result{},
 		&models.Class{},

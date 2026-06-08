@@ -6,6 +6,8 @@ import Teachers from './pages/Teachers'
 import Staff from './pages/Staff'
 import Notices from './pages/Notices'
 import NoticeDetail from './pages/NoticeDetail'
+import GovOrders from './pages/GovOrders'
+import GovOrderDetail from './pages/GovOrderDetail'
 import Gallery from './pages/Gallery'
 import Results from './pages/Results'
 import Contact from './pages/Contact'
@@ -23,6 +25,8 @@ export default function App() {
           <Route path="staff" element={<Staff />} />
           <Route path="notices" element={<Notices />} />
           <Route path="notices/:id" element={<NoticeDetail />} />
+          <Route path="gov-orders" element={<GovOrders />} />
+          <Route path="gov-orders/:id" element={<GovOrderDetail />} />
           <Route path="gallery" element={<Gallery />} />
           <Route path="results" element={<Results />} />
           <Route path="contact" element={<Contact />} />

@@ -6,6 +6,8 @@ import (
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
+	"strings"
 	"time"
 
 	"satbaria-college/internal/database"
@@ -42,12 +44,22 @@ func main() {
 		"formatDate": func(t time.Time) string {
 			return t.Format("02 Jan 2006")
 		},
+		"formatDateInput": func(t time.Time) string {
+			if t.IsZero() {
+				return ""
+			}
+			return t.Format("2006-01-02")
+		},
 	})
 	r.LoadHTMLGlob("internal/static/templates/admin/*.html")
 	// Fallback for systems where ** doesn't recurse
 	// r.LoadHTMLGlob("internal/static/templates/admin/*.html")
 	r.Static("/uploads", "./uploads")
 	r.Static("/static", "./internal/static")
+
+	// Force-download endpoint: serves an uploaded file as an attachment so the
+	// browser downloads it (works cross-origin, unlike the HTML download attr).
+	r.GET("/download", downloadFile)
 
 	// CORS
 	r.Use(middleware.CORSMiddleware())
@@ -60,6 +72,8 @@ func main() {
 		api.GET("/staff", getStaff)
 		api.GET("/notices", getNotices)
 		api.GET("/notices/:id", getNotice)
+		api.GET("/gov-orders", getGovOrders)
+		api.GET("/gov-orders/:id", getGovOrder)
 		api.GET("/gallery", getGallery)
 		api.GET("/results", getResults)
 		api.GET("/student-summary", getStudentSummary)
@@ -96,6 +110,12 @@ func main() {
 		adminAPIAuth.POST("/notices", adminCreateNotice)
 		adminAPIAuth.PUT("/notices/:id", adminUpdateNotice)
 		adminAPIAuth.DELETE("/notices/:id", adminDeleteNotice)
+
+		// Gov Orders
+		adminAPIAuth.GET("/gov-orders", adminGetGovOrders)
+		adminAPIAuth.POST("/gov-orders", adminCreateGovOrder)
+		adminAPIAuth.PUT("/gov-orders/:id", adminUpdateGovOrder)
+		adminAPIAuth.DELETE("/gov-orders/:id", adminDeleteGovOrder)
 
 		// Gallery
 		adminAPIAuth.GET("/gallery", adminGetGallery)
@@ -160,6 +180,11 @@ func main() {
 		adminWebAuth.POST("/notices", adminWebCreateNotice)
 		adminWebAuth.POST("/notices/:id/update", adminWebUpdateNotice)
 		adminWebAuth.POST("/notices/:id/delete", adminWebDeleteNotice)
+
+		adminWebAuth.GET("/gov-orders", adminWebGovOrders)
+		adminWebAuth.POST("/gov-orders", adminWebCreateGovOrder)
+		adminWebAuth.POST("/gov-orders/:id/update", adminWebUpdateGovOrder)
+		adminWebAuth.POST("/gov-orders/:id/delete", adminWebDeleteGovOrder)
 
 		adminWebAuth.GET("/gallery", adminWebGallery)
 		adminWebAuth.POST("/gallery", adminWebCreateGallery)
@@ -257,6 +282,23 @@ func getNotice(c *gin.Context) {
 		return
 	}
 	c.JSON(http.StatusOK, gin.H{"data": notice})
+}
+
+func getGovOrders(c *gin.Context) {
+	var orders []models.GovOrder
+	database.DB.Where("is_active = ?", true).
+		Order("is_pinned desc, order_date desc, publish_date desc").Find(&orders)
+	c.JSON(http.StatusOK, gin.H{"data": orders})
+}
+
+func getGovOrder(c *gin.Context) {
+	id := c.Param("id")
+	var order models.GovOrder
+	if err := database.DB.Where("id = ? AND is_active = ?", id, true).First(&order).Error; err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Gov order not found"})
+		return
+	}
+	c.JSON(http.StatusOK, gin.H{"data": order})
 }
 
 func getGallery(c *gin.Context) {
@@ -470,6 +512,33 @@ func adminUpdateNotice(c *gin.Context) {
 }
 func adminDeleteNotice(c *gin.Context) {
 	database.DB.Delete(&models.Notice{}, c.Param("id"))
+	c.JSON(http.StatusOK, gin.H{"message": "Deleted"})
+}
+
+// Gov Orders
+func adminGetGovOrders(c *gin.Context) {
+	var items []models.GovOrder
+	database.DB.Order("is_pinned desc, order_date desc, publish_date desc").Find(&items)
+	c.JSON(http.StatusOK, gin.H{"data": items, "total": len(items)})
+}
+func adminCreateGovOrder(c *gin.Context) {
+	var item models.GovOrder
+	c.ShouldBindJSON(&item)
+	if item.PublishDate.IsZero() {
+		item.PublishDate = time.Now()
+	}
+	database.DB.Create(&item)
+	c.JSON(http.StatusCreated, gin.H{"data": item})
+}
+func adminUpdateGovOrder(c *gin.Context) {
+	var item models.GovOrder
+	database.DB.First(&item, c.Param("id"))
+	c.ShouldBindJSON(&item)
+	database.DB.Save(&item)
+	c.JSON(http.StatusOK, gin.H{"data": item})
+}
+func adminDeleteGovOrder(c *gin.Context) {
+	database.DB.Delete(&models.GovOrder{}, c.Param("id"))
 	c.JSON(http.StatusOK, gin.H{"message": "Deleted"})
 }
 
@@ -776,13 +845,16 @@ func adminWebNotices(c *gin.Context) {
 }
 
 func adminWebCreateNotice(c *gin.Context) {
+	attachment, attachmentName := saveUploadedFileWithName(c, "attachment")
 	item := models.Notice{
-		Title:       c.PostForm("title"),
-		Content:     c.PostForm("content"),
-		Image:       saveUploadedFile(c, "image"),
-		PublishDate: time.Now(),
-		IsActive:    c.PostForm("is_active") == "on",
-		IsPinned:    c.PostForm("is_pinned") == "on",
+		Title:          c.PostForm("title"),
+		Content:        c.PostForm("content"),
+		Image:          saveUploadedFile(c, "image"),
+		Attachment:     attachment,
+		AttachmentName: attachmentName,
+		PublishDate:    parseFormDate(c.PostForm("publish_date")),
+		IsActive:       c.PostForm("is_active") == "on",
+		IsPinned:       c.PostForm("is_pinned") == "on",
 	}
 	database.DB.Create(&item)
 	c.Redirect(http.StatusFound, "/admin/notices")
@@ -798,9 +870,16 @@ func adminWebUpdateNotice(c *gin.Context) {
 	item.Content = c.PostForm("content")
 	item.IsActive = c.PostForm("is_active") == "on"
 	item.IsPinned = c.PostForm("is_pinned") == "on"
+	if d := c.PostForm("publish_date"); d != "" {
+		item.PublishDate = parseFormDate(d)
+	}
 
 	if newImg := saveUploadedFile(c, "image"); newImg != "" {
 		item.Image = newImg
+	}
+	if newFile, newName := saveUploadedFileWithName(c, "attachment"); newFile != "" {
+		item.Attachment = newFile
+		item.AttachmentName = newName
 	}
 
 	database.DB.Save(&item)
@@ -810,6 +889,64 @@ func adminWebUpdateNotice(c *gin.Context) {
 func adminWebDeleteNotice(c *gin.Context) {
 	database.DB.Delete(&models.Notice{}, c.Param("id"))
 	c.Redirect(http.StatusFound, "/admin/notices")
+}
+
+// Gov Orders (web panel)
+func adminWebGovOrders(c *gin.Context) {
+	var items []models.GovOrder
+	database.DB.Order("is_pinned desc, order_date desc, publish_date desc").Find(&items)
+	c.HTML(http.StatusOK, "gov_orders.html", gin.H{
+		"title": "Gov Orders", "username": c.GetString("username"), "items": items,
+	})
+}
+
+func adminWebCreateGovOrder(c *gin.Context) {
+	attachment, attachmentName := saveUploadedFileWithName(c, "attachment")
+	item := models.GovOrder{
+		Title:          c.PostForm("title"),
+		Content:        c.PostForm("content"),
+		OrderNumber:    c.PostForm("order_number"),
+		Attachment:     attachment,
+		AttachmentName: attachmentName,
+		OrderDate:      parseFormDate(c.PostForm("order_date")),
+		PublishDate:    parseFormDate(c.PostForm("publish_date")),
+		IsActive:       c.PostForm("is_active") == "on",
+		IsPinned:       c.PostForm("is_pinned") == "on",
+	}
+	database.DB.Create(&item)
+	c.Redirect(http.StatusFound, "/admin/gov-orders")
+}
+
+func adminWebUpdateGovOrder(c *gin.Context) {
+	var item models.GovOrder
+	if err := database.DB.First(&item, c.Param("id")).Error; err != nil {
+		c.Redirect(http.StatusFound, "/admin/gov-orders")
+		return
+	}
+	item.Title = c.PostForm("title")
+	item.Content = c.PostForm("content")
+	item.OrderNumber = c.PostForm("order_number")
+	item.IsActive = c.PostForm("is_active") == "on"
+	item.IsPinned = c.PostForm("is_pinned") == "on"
+	if d := c.PostForm("order_date"); d != "" {
+		item.OrderDate = parseFormDate(d)
+	}
+	if d := c.PostForm("publish_date"); d != "" {
+		item.PublishDate = parseFormDate(d)
+	}
+
+	if newFile, newName := saveUploadedFileWithName(c, "attachment"); newFile != "" {
+		item.Attachment = newFile
+		item.AttachmentName = newName
+	}
+
+	database.DB.Save(&item)
+	c.Redirect(http.StatusFound, "/admin/gov-orders")
+}
+
+func adminWebDeleteGovOrder(c *gin.Context) {
+	database.DB.Delete(&models.GovOrder{}, c.Param("id"))
+	c.Redirect(http.StatusFound, "/admin/gov-orders")
 }
 
 func adminWebGallery(c *gin.Context) {
@@ -1095,6 +1232,29 @@ func strconvAtoi(s string) (int, error) {
 	return result, err
 }
 
+// downloadFile serves a file from the uploads directory with a
+// Content-Disposition: attachment header so the browser downloads it.
+// Query: ?file=/uploads/<name>  (optional &name=<friendly filename>)
+func downloadFile(c *gin.Context) {
+	file := c.Query("file")
+	// Only allow files under /uploads to avoid path traversal.
+	cleaned := filepath.Clean(strings.TrimPrefix(file, "/uploads/"))
+	if file == "" || !strings.HasPrefix(file, "/uploads/") || strings.Contains(cleaned, "..") {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "Invalid file"})
+		return
+	}
+	fullPath := filepath.Join("./uploads", cleaned)
+	if _, err := os.Stat(fullPath); err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "File not found"})
+		return
+	}
+	name := c.Query("name")
+	if name == "" {
+		name = filepath.Base(cleaned)
+	}
+	c.FileAttachment(fullPath, name)
+}
+
 func saveUploadedFile(c *gin.Context, fieldName string) string {
 	file, err := c.FormFile(fieldName)
 	if err != nil {
@@ -1103,6 +1263,30 @@ func saveUploadedFile(c *gin.Context, fieldName string) string {
 	filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
 	c.SaveUploadedFile(file, "./uploads/"+filename)
 	return "/uploads/" + filename
+}
+
+// saveUploadedFileWithName stores the file and returns both its served path and
+// the original filename (useful for showing a friendly download label).
+func saveUploadedFileWithName(c *gin.Context, fieldName string) (string, string) {
+	file, err := c.FormFile(fieldName)
+	if err != nil {
+		return "", ""
+	}
+	filename := fmt.Sprintf("%d_%s", time.Now().UnixNano(), file.Filename)
+	c.SaveUploadedFile(file, "./uploads/"+filename)
+	return "/uploads/" + filename, file.Filename
+}
+
+// parseFormDate parses a yyyy-mm-dd date from an HTML date input. Empty or
+// invalid input falls back to the current time.
+func parseFormDate(s string) time.Time {
+	if s == "" {
+		return time.Now()
+	}
+	if t, err := time.Parse("2006-01-02", s); err == nil {
+		return t
+	}
+	return time.Now()
 }
 
 // Helper to get DB for deferred use
