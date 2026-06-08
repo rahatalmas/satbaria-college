@@ -15,6 +15,15 @@ export const assetUrl = (path) => {
   return `${API_DOMAIN}${path.startsWith('/') ? '' : '/'}${path}`
 }
 
+// Build a force-download URL that serves the file with a
+// Content-Disposition: attachment header (works cross-origin).
+export const downloadUrl = (path, name) => {
+  if (!path) return path
+  const params = new URLSearchParams({ file: path })
+  if (name) params.set('name', name)
+  return `${API_DOMAIN}/download?${params.toString()}`
+}
+
 // College Info
 export const getCollegeInfo = () => api.get('/college-info').then(r => r.data.data)
 
@@ -27,6 +36,10 @@ export const getStaff = () => api.get('/staff').then(r => r.data.data)
 // Notices
 export const getNotices = () => api.get('/notices').then(r => r.data.data)
 export const getNotice = (id) => api.get(`/notices/${id}`).then(r => r.data.data)
+
+// Gov Orders
+export const getGovOrders = () => api.get('/gov-orders').then(r => r.data.data)
+export const getGovOrder = (id) => api.get(`/gov-orders/${id}`).then(r => r.data.data)
 
 // Gallery
 export const getGallery = (category = '') =>

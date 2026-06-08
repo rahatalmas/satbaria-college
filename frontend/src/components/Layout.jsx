@@ -7,6 +7,7 @@ const NAV_ITEMS = [
   { to: '/academics', label: 'Academics' },
   { to: '/results', label: 'Result' },
   { to: '/notices', label: 'Notice' },
+  { to: '/gov-orders', label: 'Gov Order' },
   { to: '/gallery', label: 'Gallery' },
   { to: '/teachers', label: 'Teachers' },
   { to: '/staff', label: 'Staff' },
