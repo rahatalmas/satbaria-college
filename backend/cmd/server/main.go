@@ -905,7 +905,6 @@ func adminWebCreateGovOrder(c *gin.Context) {
 	item := models.GovOrder{
 		Title:          c.PostForm("title"),
 		Content:        c.PostForm("content"),
-		OrderNumber:    c.PostForm("order_number"),
 		Attachment:     attachment,
 		AttachmentName: attachmentName,
 		OrderDate:      parseFormDate(c.PostForm("order_date")),
@@ -925,7 +924,6 @@ func adminWebUpdateGovOrder(c *gin.Context) {
 	}
 	item.Title = c.PostForm("title")
 	item.Content = c.PostForm("content")
-	item.OrderNumber = c.PostForm("order_number")
 	item.IsActive = c.PostForm("is_active") == "on"
 	item.IsPinned = c.PostForm("is_pinned") == "on"
 	if d := c.PostForm("order_date"); d != "" {

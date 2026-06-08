@@ -58,7 +58,6 @@ export default function GovOrderDetail() {
             )}
             <h1 className="font-display text-3xl font-bold text-gray-900 mb-4">{order.title}</h1>
             <div className="flex flex-wrap items-center gap-2 text-gray-400 text-sm mb-6 pb-6 border-b border-gray-100">
-              {order.order_number && <><span>📄 Order No: {order.order_number}</span><span>•</span></>}
               {orderDate && <><span>📅 {orderDate}</span><span>•</span></>}
               <span>Satbaria Degree College</span>
             </div>

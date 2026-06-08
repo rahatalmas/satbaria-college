@@ -16,8 +16,7 @@ export default function GovOrders() {
 
   const filtered = orders.filter(o =>
     o.title?.toLowerCase().includes(search.toLowerCase()) ||
-    o.content?.toLowerCase().includes(search.toLowerCase()) ||
-    o.order_number?.toLowerCase().includes(search.toLowerCase())
+    o.content?.toLowerCase().includes(search.toLowerCase())
   )
 
   const pinned = filtered.filter(o => o.is_pinned)
@@ -91,9 +90,6 @@ function GovOrderItem({ order }) {
               <span className="shrink-0 text-xs bg-red-100 text-red-700 px-2 py-0.5 rounded-full font-medium">Pinned</span>
             )}
           </div>
-          {order.order_number && (
-            <p className="text-xs text-gray-400 mt-0.5">Order No: {order.order_number}</p>
-          )}
           {order.content && (
             <p className="text-gray-500 text-sm mt-1 line-clamp-2">{order.content}</p>
           )}

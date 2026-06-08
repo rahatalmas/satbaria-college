@@ -44,15 +44,14 @@ type Notice struct {
 	IsPinned       bool      `gorm:"default:false" json:"is_pinned"`
 }
 
-// GovOrder model - government orders/circulars with attachment
+// GovOrder model - government notices/circulars (rules & policies) with attachment
 type GovOrder struct {
 	gorm.Model
 	Title          string    `gorm:"not null" json:"title"`
 	Content        string    `gorm:"type:text" json:"content"`
-	OrderNumber    string    `json:"order_number"`
 	Attachment     string    `json:"attachment"`      // path to uploaded file (pdf/doc/any)
 	AttachmentName string    `json:"attachment_name"` // original file name
-	OrderDate      time.Time `json:"order_date"`      // date printed on the order
+	OrderDate      time.Time `json:"order_date"`      // date of the government notice
 	PublishDate    time.Time `json:"publish_date"`    // date published on the site
 	IsActive       bool      `gorm:"default:true" json:"is_active"`
 	IsPinned       bool      `gorm:"default:false" json:"is_pinned"`
